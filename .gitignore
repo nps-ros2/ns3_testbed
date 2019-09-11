@@ -1,0 +1,10 @@
+# colcon / cmake
+install/
+log/
+
+# vi
+*.swp
+
+# C extensions
+*.so
+
