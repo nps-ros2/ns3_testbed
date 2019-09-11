@@ -3,7 +3,7 @@ Testbed for simulating ROS2 network loads.  Create your network load profile, se
 
 Clone, have RSA key:
 
-    git clone git@github.com/nps-ros2/ns3_testbed.git
+    git clone git@github.com:nps-ros2/ns3_testbed.git
 
 Clone, authenticate to push:
 
