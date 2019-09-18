@@ -16,23 +16,23 @@
 static unsigned int count = 5;
 static std::string _home(getenv("HOME"));
 static const std::string default_setup_file(_home.append("/gits/ns3_testbed/csv_setup/example1.csv"));
-static std::string setup_file = default_setup_file;
+static std::string input_file = default_setup_file;
 static bool use_nns = false;
 static bool use_pipe = false;
-static bool use_delay = false;
+static bool use_staggered = false;
 static bool verbose = false;
 
 void print_usage()
 {
   printf("Usage:\n");
-  printf("testbed_runner -h|-H|-c <count>|--count <count>|-s <file>|--setup_file <file>|-n|--use_nns|-p|--use_pipe|-d|--use_delay|-v|--verbose\n");
+  printf("testbed_runner -h|-H|-c <count>|--count <count>|-i <file>|--input_file <file>|-n|--use_nns|-p|--use_pipe|-s|--use_staggered|-v|--verbose\n");
   printf("options:\n");
   printf("-h : Print this help function.\n");
   printf("-c <count>: Number of robots, starting at 1.\n");
-  printf("-s <setup file>: The CSV setup file.\n");
+  printf("-i <input setup file>: The CSV input setup file.\n");
   printf("-n: Use network namespace.\n");
   printf("-p: Use pipe.\n");
-  printf("-d: Use delay.\n");
+  printf("-s: Use staggered start.\n");
   printf("-v: verbose.\n");
 }
 
@@ -48,17 +48,17 @@ void get_options(int argc, char *argv[]) {
       {"help",                          no_argument, 0, 'h'},
       {"Help",                          no_argument, 0, 'H'},
       {"count",                   required_argument, 0, 'c'},
-      {"setup_file",              required_argument, 0, 's'},
+      {"input_file",              required_argument, 0, 'i'},
       {"use_nns",                 required_argument, 0, 'n'},
       {"use_pipe",                required_argument, 0, 'p'},
-      {"use_delay",                     no_argument, 0, 'd'},
+      {"use_staggered",                 no_argument, 0, 's'},
       {"verbose",                       no_argument, 0, 'v'},
 
       // end
       {0,0,0,0}
     };
 
-    int ch = getopt_long(argc, argv, "hHc:s:npdv", long_options, &option_index);
+    int ch = getopt_long(argc, argv, "hHc:i:npsv", long_options, &option_index);
 
     if (ch == -1) {
       // no more arguments
@@ -81,8 +81,8 @@ void get_options(int argc, char *argv[]) {
         count = std::atoi(optarg);
         break;
       }
-      case 's': {	// setup_file
-        setup_file = optarg;
+      case 'i': {	// input_file
+        input_file = optarg;
         break;
       }
       case 'n': {	// nns
@@ -93,8 +93,8 @@ void get_options(int argc, char *argv[]) {
         use_pipe = true;
         break;
       }
-      case 'd': {	// staggered delay
-        use_delay = true;
+      case 's': {	// staggered start
+        use_staggered = true;
         break;
       }
       case 'v': {	// count
@@ -111,7 +111,7 @@ void get_options(int argc, char *argv[]) {
 
 // start, stay here until done.
 void _start_robots(unsigned int count, bool use_nns, bool use_pipe,
-                   bool use_delay,
+                   bool use_staggered,
                    bool verbose, publishers_subscribers_t* ps_ptr) {
 
   std::vector<std::thread*> threads;
@@ -132,7 +132,7 @@ void _start_robots(unsigned int count, bool use_nns, bool use_pipe,
                                       use_nns, use_pipe, verbose, ps_ptr));
 
     // sleep to stagger
-    if (use_delay) {
+    if (use_staggered) {
       std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
   }
@@ -158,7 +158,7 @@ int main(int argc, char * argv[])
 
   // pointer to static list of publishers and subscribers
   publishers_subscribers_t* publishers_subscribers_ptr =
-                      new publishers_subscribers_t(setup_file, verbose);
+                      new publishers_subscribers_t(input_file, verbose);
 
   std::cout << "num publisers: "
             << publishers_subscribers_ptr->publishers.size() << "\n";
@@ -168,7 +168,7 @@ int main(int argc, char * argv[])
   // call once per process for rclcpp
   rclcpp::init(argc, argv);
 
-  _start_robots(count, use_nns, use_pipe, use_delay, verbose,
+  _start_robots(count, use_nns, use_pipe, use_staggered, verbose,
                 publishers_subscribers_ptr);
 
   rclcpp::shutdown();

@@ -44,11 +44,11 @@ int get_options(int argc, char *argv[]) {
     }
     switch (ch) {
       case 'h': {	// help
-        std::cout << "Usage: -h|-H|-c <count>\n";
+        std::cout << "Usage: -h|-H|-c <count>|-l <length>\n";
         exit(0);
       }
       case 'H': {	// Help
-        std::cout << "Usage: -h|-H|-c <count>\n";
+        std::cout << "Usage: -h|-H|-c <count>|-l <length>\n";
         exit(0);
       }
       case 'c': {	// count
