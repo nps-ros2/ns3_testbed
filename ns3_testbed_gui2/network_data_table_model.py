@@ -5,7 +5,7 @@ from pipe_logger import PipeReader
 
 class NetworkDataTableModel(QAbstractTableModel):
 
-    def __init__(self, parent=None): 
+    def __init__(self, output_file, parent=None): 
         super(NetworkDataTableModel, self).__init__()
         self.column_titles = ["Src-Dest", "Subscription", "Size", "Index",
                               "Time Sent ns", "Latency ms"]
@@ -24,7 +24,7 @@ class NetworkDataTableModel(QAbstractTableModel):
         timer.start(1000) # once per second
 
         # output file
-        self.outfile = open("_output_file", "w")
+        self.outfile = open(output_file, "w")
 
     def headerData(self, section, orientation, role=Qt.DisplayRole):
         if role == Qt.DisplayRole and orientation == Qt.Horizontal:
