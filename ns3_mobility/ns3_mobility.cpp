@@ -120,6 +120,7 @@ void ns3_setup(ns3::NodeContainer& ns3_nodes) {
                           ns3::StringValue("ns3::RealtimeSimulatorImpl"));
   ns3::GlobalValue::Bind("ChecksumEnabled", ns3::BooleanValue(true));
 
+  // Use HardLimit mode, being sure ns-3 is modified to warn instead of halt.
 //  ns3::GlobalValue::Bind("SynchronizationMode",
 //                          ns3::StringValue("ns3::RealtimeSimulatorImpl::HardLimit"));
   ns3::Config::SetDefault("ns3::RealtimeSimulatorImpl::SynchronizationMode",ns3::EnumValue(ns3::RealtimeSimulatorImpl::SYNC_HARD_LIMIT));

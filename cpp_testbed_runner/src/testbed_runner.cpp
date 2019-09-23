@@ -133,7 +133,7 @@ void _start_robots(unsigned int count, bool use_nns, bool use_pipe,
 
     // sleep to stagger
     if (use_staggered) {
-      std::this_thread::sleep_for(std::chrono::milliseconds(100));
+      std::this_thread::sleep_for(std::chrono::milliseconds(88));
     }
   }
 
