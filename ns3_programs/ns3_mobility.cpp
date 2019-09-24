@@ -134,10 +134,6 @@ void ns3_setup(ns3::NodeContainer& ns3_nodes) {
   wifi.SetRemoteStationManager("ns3::ConstantRateWifiManager",
                           "DataMode", ns3::StringValue("OfdmRate54Mbps"));
 
-  // ad-hoc Wifi network
-  ns3::WifiMacHelper wifiMac;
-  wifiMac.SetType("ns3::AdhocWifiMac");
-
   // physical layer
   ns3::YansWifiChannelHelper wifiChannel(ns3::YansWifiChannelHelper::Default());
   ns3::YansWifiPhyHelper wifiPhy(ns3::YansWifiPhyHelper::Default());
@@ -145,6 +141,10 @@ void ns3_setup(ns3::NodeContainer& ns3_nodes) {
   wifiPhy.Set("TxPowerStart", ns3::DoubleValue(p));
   wifiPhy.Set("TxPowerEnd", ns3::DoubleValue(p));
   wifiPhy.SetChannel(wifiChannel.Create());
+
+  // ad-hoc Wifi network
+  ns3::WifiMacHelper wifiMac;
+  wifiMac.SetType("ns3::AdhocWifiMac");
 
   // install the wireless devices onto our ghost ns3_nodes.
   ns3::NetDeviceContainer devices = wifi.Install(wifiPhy, wifiMac, ns3_nodes);
