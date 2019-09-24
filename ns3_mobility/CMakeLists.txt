@@ -14,3 +14,12 @@ target_link_libraries(ns3_mobility
   ns3.29-tap-bridge-debug
 )
 
+add_executable(ns3_csma ns3_csma.cpp)
+target_link_libraries(ns3_csma
+  ns3.29-core-debug
+  ns3.29-network-debug
+  ns3.29-internet-debug
+  ns3.29-tap-bridge-debug
+  ns3.29-csma-debug
+)
+
