@@ -1,10 +1,11 @@
-
 #include <vector>
 #include <memory> // for shared_ptr
 #include <string>
 #include <sstream>
 #include <chrono> // for timer
 #include <functional> // for bind
+#include <cmath> // round
+#include <iomanip> // std::setprecision
 #include "rclcpp/rclcpp.hpp"
 //#include "rclcpp/time.hpp"
 // https://discourse.ros.org/t/ros2-how-to-use-custom-message-in-project-where-its-declared/2071
@@ -81,7 +82,8 @@ subscriber_callback_t::subscriber_callback_t(testbed_robot_t* _r_ptr,
          qos_profile(_qos_profile),
          use_pipe(_use_pipe),
          verbose(_verbose),
-         node_logger(r_ptr->get_logger()) {
+         node_logger(r_ptr->get_logger()),
+         count(0) {
 
 
   auto callback = [this](
@@ -98,11 +100,15 @@ void subscriber_callback_t::subscriber_callback(
               const cpp_testbed_runner::msg::TestbedMessage::SharedPtr msg) {
 
   // message summary
+  float percent_loss = 100.0 * (msg->message_number - ++count)/
+                           msg->message_number;
   std::stringstream ss;
-  ss << msg->source << "-" << r_ptr->r << "," // src-dest
+  ss << std::fixed << std::setprecision(2)    // use 2 decimal places
+     << msg->source << "-" << r_ptr->r << "," // src-dest
      << msg->message_name << ","              // subscription name
      << msg->message.size() << ","            // size of these records
      << msg->message_number << ","            // message number
+     << percent_loss << ","                   // percent loss
      << msg->nanoseconds << ","               // time sent in nanoseconds
      << (_now_nanoseconds() - msg->nanoseconds) / 1000000.0; // delta ms
   if(verbose || !use_pipe) {

@@ -45,6 +45,7 @@ class subscriber_callback_t {
   const bool use_pipe;
   const bool verbose;
   rclcpp::Logger node_logger;
+  int count;
 
   public:
   subscriber_callback_t(testbed_robot_t* _r_ptr,

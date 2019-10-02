@@ -8,7 +8,7 @@ class NetworkDataTableModel(QAbstractTableModel):
     def __init__(self, output_file, parent=None): 
         super(NetworkDataTableModel, self).__init__()
         self.column_titles = ["Src-Dest", "Subscription", "Size", "Index",
-                              "Time Sent ns", "Latency ms"]
+                              "Percent Loss", "Time Sent ns", "Latency ms"]
         self.network_data = dict()
         self.unsorted_keys = list()
 
@@ -38,6 +38,7 @@ class NetworkDataTableModel(QAbstractTableModel):
 #     << msg->message_name << ","              // subscription name
 #     << msg->message.size() << ","            // size of these records
 #     << msg->message_number << ","            // message number
+#     << percent_loss << ","                   // percent loss
 #     << msg->nanoseconds << ","               // time sent in nanoseconds
 #     << (_now_nanoseconds() - msg->nanoseconds) / 1000000.0; // delta ms
 
@@ -52,9 +53,9 @@ class NetworkDataTableModel(QAbstractTableModel):
 
             # (R1-R2,subscription)
             key = (parts[0],parts[1])
-            # [size, message#, latency]
-            value = [int(parts[2]),int(parts[3]), int(parts[4]),
-                     float(parts[5])]
+            # [size, message#, count received, time, latency]
+            value = [int(parts[2]),int(parts[3]), float(parts[4]),
+                     int(parts[5]), float(parts[6])]
             new_network_data[key]=value
         self.set_data(new_network_data)
         self.outfile.flush()

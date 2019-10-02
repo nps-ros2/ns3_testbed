@@ -134,10 +134,10 @@ void set_mobility(ns3::NodeContainer& ns3_nodes,
   // random walk2 mobility
   ns3::MobilityHelper random_walk2_mobility;
   random_walk2_mobility.SetPositionAllocator(positionAlloc);
-  float y=testbed_settings.length; // box edge length
+  float l=testbed_settings.length; // box edge length
   random_walk2_mobility.SetMobilityModel(
           "ns3::RandomWalk2dMobilityModel", // model
-          "Bounds", ns3::RectangleValue(ns3::Rectangle(-1.0,y,-1.0,y)),
+          "Bounds", ns3::RectangleValue(ns3::Rectangle(-l,l,-l,l)),
           "Time", ns3::StringValue("2s"), // change after Time
           "Distance", ns3::StringValue("4.0"), // change after Distance
           "Mode", ns3::StringValue("Time"),   // use change after Time
@@ -180,33 +180,12 @@ void mobility_interval_function(const ns3::NodeContainer& ns3_nodes,
       ns3::Ptr<ns3::ConstantPositionMobilityModel> mobility_model =
                    node->GetObject<ns3::ConstantPositionMobilityModel>();
       auto vector = mobility_model->GetPosition();
-//      ss << i << ":fixed ";
       ss << i << ":" << vector.x << "," << vector.y << "  ";
     }
   }
   ss << "\n";
   std::cout << ss.str();
 }
-
-
-
-/*
-  ns3::Ptr<ns3::ConstantPositionMobilityModel> mobility_model =
-                   node->GetObject<ns3::ConstantPositionMobilityModel>();
-  auto vector = mobility_model->GetPosition();
-  std::cout << vector.x << "  " << vector.y << "  " << vector.z << "      ";
-
-  // show robot x,y,z positions
-  for (int i=1; i<testbed_settings.count; i++) {
-    ns3::Ptr<ns3::Node> node = ns3_nodes.Get(i);
-    ns3::Ptr<ns3::RandomWalk2dMobilityModel> mobility_model =
-                     node->GetObject<ns3::RandomWalk2dMobilityModel>();
-    auto vector = mobility_model->GetPosition();
-    std::cout << vector.x << "  " << vector.y << "  " << vector.z << "      ";
-  }
-  std::cout << std::endl;
-}
-*/
 
 void connect_tap_bridges(const ns3::NodeContainer& ns3_nodes,
                          const ns3::NetDeviceContainer& devices,
