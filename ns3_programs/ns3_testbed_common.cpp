@@ -31,9 +31,9 @@ void testbed_setup() {
 std::string usage() {
   std::cout << "Usage: -h|-H|-s <setup file> -c <count>|-l <length>\n"
             << "-h : Print this help function.\n"
-            << "-s <setup file>: The CSV setup file.\n"
             << "-c <count>: Number of robots, starting at 1.\n"
             << "-l <length>: Mobility box edge length, in meters.\n"
+            << "-s <setup file>: The CSV setup file.\n"
             ;
 }
 
@@ -46,9 +46,9 @@ int get_testbed_options(int argc, char *argv[], int *count, int *length,
                                "/gits/ns3_testbed/csv_setup/ns3_defaults.csv"));
 
   // defaults
-  *setup_file = default_setup_file;
   *count = 5;
   *length = 30;
+  *setup_file = default_setup_file;
 
   // parse options
   int option_index; // not used
@@ -58,15 +58,15 @@ int get_testbed_options(int argc, char *argv[], int *count, int *length,
       // options
       {"help",                          no_argument, 0, 'h'},
       {"Help",                          no_argument, 0, 'H'},
-      {"setup_file",              required_argument, 0, 's'},
       {"count",                   required_argument, 0, 'c'},
       {"length",                  required_argument, 0, 'l'},
+      {"setup_file",              required_argument, 0, 's'},
 
       // end
       {0,0,0,0}
     };
 
-    int ch = getopt_long(argc, argv, "hHs:c:l:", long_options, &option_index);
+    int ch = getopt_long(argc, argv, "hHc:l:s:", long_options, &option_index);
 
     if (ch == -1) {
       // no more arguments
