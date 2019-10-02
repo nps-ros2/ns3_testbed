@@ -28,7 +28,7 @@ void testbed_setup() {
                 ns3::EnumValue(ns3::RealtimeSimulatorImpl::SYNC_HARD_LIMIT));
 }
 
-std::string usage() {
+void usage() {
   std::cout << "Usage: -h|-H|-s <setup file> -c <count>|-l <length>\n"
             << "-h : Print this help function.\n"
             << "-c <count>: Number of robots, starting at 1.\n"
