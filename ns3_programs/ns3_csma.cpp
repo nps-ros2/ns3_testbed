@@ -10,11 +10,14 @@
 #include "ns3/csma-module.h"
 
 #include "ns3_testbed_common.hpp"
+#include "ns3_testbed_settings.hpp"
 
 int main(int argc, char *argv[]) {
   int count;
   int length;
-  get_testbed_options(argc, argv, &count, &length);
+  std::string setup_file;
+  get_testbed_options(argc, argv, &count, &length, &setup_file);
+  ns3_testbed_settings_t testbed_settings(count, length, setup_file);
 
   // testbed setup
   testbed_setup();
@@ -31,7 +34,7 @@ int main(int argc, char *argv[]) {
   connect_tap_bridges(ns3_nodes, devices, count);
 
   // start testbed
-  start_testbed("ns3_mobility", count, length);
+  start_testbed("ns3_mobility", testbed_settings);
   return 0;
 }
 

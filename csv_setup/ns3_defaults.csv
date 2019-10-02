@@ -1,0 +1,7 @@
+mobility,,,
+Node,X,Y,Walks
+R1,0,0,false
+R2,1,0,false
+R3,0,1,false
+R4,-1,0,false
+R5,0,-1,false

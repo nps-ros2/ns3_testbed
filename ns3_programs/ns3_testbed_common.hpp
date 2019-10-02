@@ -14,14 +14,20 @@
 #include "ns3/tap-bridge-module.h"
 #include "ns3/random-variable-stream.h"
 
+#include "ns3_testbed_settings.hpp"
+
 void testbed_setup();
-int get_testbed_options(int argc, char *argv[], int *count, int *length);
-void set_mobility(ns3::NodeContainer& ns3_nodes, int count, int length);
-void mobility_interval_function(const ns3::NodeContainer& ns3_nodes, int count);
+int get_testbed_options(int argc, char *argv[], int *count, int *length,
+                        std::string *setup_file);
+void set_mobility(ns3::NodeContainer& ns3_nodes,
+                        const ns3_testbed_settings_t &testbed_settings);
+void mobility_interval_function(const ns3::NodeContainer& ns3_nodes,
+                        const ns3_testbed_settings_t &testbed_settings);
 void connect_tap_bridges(const ns3::NodeContainer& ns3_nodes,
                          const ns3::NetDeviceContainer& devices,
                          int count);
-void start_testbed(std::string name, int count, int length);
+void start_testbed(std::string name, 
+                        const ns3_testbed_settings_t &testbed_settings);
 
 #endif
 

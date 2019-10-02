@@ -11,6 +11,8 @@
 #include "ns3/tap-bridge-module.h"
 //#include "ns3/random-variable-stream.h"
 
+#include "ns3_testbed_common.hpp"
+
 // realtime mode
 void testbed_setup() {
   // Force flush of the stdout buffer.
@@ -26,11 +28,25 @@ void testbed_setup() {
                 ns3::EnumValue(ns3::RealtimeSimulatorImpl::SYNC_HARD_LIMIT));
 }
 
+std::string usage() {
+  std::cout << "Usage: -h|-H|-s <setup file> -c <count>|-l <length>\n"
+            << "-h : Print this help function.\n"
+            << "-s <setup file>: The CSV setup file.\n"
+            << "-c <count>: Number of robots, starting at 1.\n"
+            << "-l <length>: Mobility box edge length, in meters.\n"
+            ;
+}
 
 // parse user input
-int get_testbed_options(int argc, char *argv[], int *count, int *length) {
+int get_testbed_options(int argc, char *argv[], int *count, int *length,
+                        std::string *setup_file) {
+
+  std::string _home(getenv("HOME"));
+  const std::string default_setup_file(_home.append(
+                               "/gits/ns3_testbed/csv_setup/ns3_defaults.csv"));
 
   // defaults
+  *setup_file = default_setup_file;
   *count = 5;
   *length = 30;
 
@@ -42,6 +58,7 @@ int get_testbed_options(int argc, char *argv[], int *count, int *length) {
       // options
       {"help",                          no_argument, 0, 'h'},
       {"Help",                          no_argument, 0, 'H'},
+      {"setup_file",              required_argument, 0, 's'},
       {"count",                   required_argument, 0, 'c'},
       {"length",                  required_argument, 0, 'l'},
 
@@ -49,7 +66,7 @@ int get_testbed_options(int argc, char *argv[], int *count, int *length) {
       {0,0,0,0}
     };
 
-    int ch = getopt_long(argc, argv, "hHc:l:", long_options, &option_index);
+    int ch = getopt_long(argc, argv, "hHs:c:l:", long_options, &option_index);
 
     if (ch == -1) {
       // no more arguments
@@ -61,12 +78,16 @@ int get_testbed_options(int argc, char *argv[], int *count, int *length) {
     }
     switch (ch) {
       case 'h': {	// help
-        std::cout << "Usage: -h|-H|-c <count>|-l <length>\n";
+        usage();
         exit(0);
       }
       case 'H': {	// Help
-        std::cout << "Usage: -h|-H|-c <count>|-l <length>\n";
+        usage();
         exit(0);
+      }
+      case 's': {	// setup file
+        *setup_file = optarg;
+        break;
       }
       case 'c': {	// count
         *count = std::atoi(optarg);
@@ -92,25 +113,29 @@ int get_testbed_options(int argc, char *argv[], int *count, int *length) {
 //https://www.nsnam.org/doxygen/mobility-trace-example_8cc_source.html
 //  mobility.SetMobilityModel("ns3::ConstantPositionMobilityModel");
 // https://www.nsnam.org/docs/release/3.7/doxygen/classns3_1_1_random_walk2d_mobility_model.html
-void set_mobility(ns3::NodeContainer& ns3_nodes, int count, int length) {
+void set_mobility(ns3::NodeContainer& ns3_nodes,
+                             const ns3_testbed_settings_t &testbed_settings) {
 
-  // all antenna locations start deterministically at 0, 0, 0
+  // fill out our list position allocator
   ns3::Ptr<ns3::ListPositionAllocator>positionAlloc =
                          ns3::CreateObject<ns3::ListPositionAllocator>();
-  for (int i=0; i<count; i++) {
-    positionAlloc->Add(ns3::Vector(0.0, 0.0, 0.0));
+  for (std::vector<mobility_record_t>::const_iterator it =
+                     testbed_settings.mobilities.begin();
+                     it != testbed_settings.mobilities.end(); ++it) {
+    positionAlloc->Add(ns3::Vector(it->x, it->y, 0.0));
   }
 
-  // ground station
-  ns3::MobilityHelper gs_mobility;
-  gs_mobility.SetPositionAllocator(positionAlloc);
-  gs_mobility.SetMobilityModel("ns3::ConstantPositionMobilityModel");
+  // constant position mobility
+  ns3::MobilityHelper constant_position_mobility;
+  constant_position_mobility.SetPositionAllocator(positionAlloc);
+  constant_position_mobility.SetMobilityModel(
+                                      "ns3::ConstantPositionMobilityModel");
 
-  // robots
-  ns3::MobilityHelper r_mobility;
-  r_mobility.SetPositionAllocator(positionAlloc);
-  float y=length; // box edge length
-  r_mobility.SetMobilityModel(
+  // random walk2 mobility
+  ns3::MobilityHelper random_walk2_mobility;
+  random_walk2_mobility.SetPositionAllocator(positionAlloc);
+  float y=testbed_settings.length; // box edge length
+  random_walk2_mobility.SetMobilityModel(
           "ns3::RandomWalk2dMobilityModel", // model
           "Bounds", ns3::RectangleValue(ns3::Rectangle(-1.0,y,-1.0,y)),
           "Time", ns3::StringValue("2s"), // change after Time
@@ -122,32 +147,57 @@ void set_mobility(ns3::NodeContainer& ns3_nodes, int count, int length) {
                        "ns3::UniformRandomVariable[Min=2.0|Max=10.0]")
   );
 
-  // apply mobility to GS and robots
-  gs_mobility.Install(ns3_nodes.Get(0));
-  for (int i=1; i<count; i++) {
-    r_mobility.Install(ns3_nodes.Get(i));
+  for (int i=0; i<testbed_settings.count; i++) {
+    if(testbed_settings.mobilities[i].walks) {
+      random_walk2_mobility.Install(ns3_nodes.Get(i));
+    } else {
+      constant_position_mobility.Install(ns3_nodes.Get(i));
+    }
   }
 }
 
 void mobility_interval_function(const ns3::NodeContainer& ns3_nodes,
-                                                            int count) {
+                          const ns3_testbed_settings_t &testbed_settings) {
 
   // schedule next interval
   ns3::Simulator::Schedule(ns3::Seconds(0.1), &mobility_interval_function,
-                                                          ns3_nodes, count);
+                                               ns3_nodes, testbed_settings);
 
   // round to 1 decimal point
   std::cout << std::fixed << std::setprecision(1);
 
   // show GS x,y,z position
-  ns3::Ptr<ns3::Node> node = ns3_nodes.Get(0);
+  std::stringstream ss;
+  ss << std::fixed << std::setprecision(1);
+  for (int i=0; i<testbed_settings.count; i++) {
+    ns3::Ptr<ns3::Node> node = ns3_nodes.Get(i);
+    if(testbed_settings.mobilities[i].walks) {
+      ns3::Ptr<ns3::RandomWalk2dMobilityModel> mobility_model =
+                     node->GetObject<ns3::RandomWalk2dMobilityModel>();
+      auto vector = mobility_model->GetPosition();
+      ss << i << ":" << vector.x << "," << vector.y << "  ";
+    } else {
+      ns3::Ptr<ns3::ConstantPositionMobilityModel> mobility_model =
+                   node->GetObject<ns3::ConstantPositionMobilityModel>();
+      auto vector = mobility_model->GetPosition();
+//      ss << i << ":fixed ";
+      ss << i << ":" << vector.x << "," << vector.y << "  ";
+    }
+  }
+  ss << "\n";
+  std::cout << ss.str();
+}
+
+
+
+/*
   ns3::Ptr<ns3::ConstantPositionMobilityModel> mobility_model =
                    node->GetObject<ns3::ConstantPositionMobilityModel>();
   auto vector = mobility_model->GetPosition();
   std::cout << vector.x << "  " << vector.y << "  " << vector.z << "      ";
 
   // show robot x,y,z positions
-  for (int i=1; i<count; i++) {
+  for (int i=1; i<testbed_settings.count; i++) {
     ns3::Ptr<ns3::Node> node = ns3_nodes.Get(i);
     ns3::Ptr<ns3::RandomWalk2dMobilityModel> mobility_model =
                      node->GetObject<ns3::RandomWalk2dMobilityModel>();
@@ -156,6 +206,7 @@ void mobility_interval_function(const ns3::NodeContainer& ns3_nodes,
   }
   std::cout << std::endl;
 }
+*/
 
 void connect_tap_bridges(const ns3::NodeContainer& ns3_nodes,
                          const ns3::NetDeviceContainer& devices,
@@ -171,11 +222,13 @@ void connect_tap_bridges(const ns3::NodeContainer& ns3_nodes,
   }
 }
 
-void start_testbed(std::string name, int count, int length) {
+void start_testbed(std::string name,
+                   const ns3_testbed_settings_t& testbed_settings) {
   // set to run for a while
   ns3::Simulator::Stop(ns3::Seconds(60*60*24*365.)); // 1 year
   std::cout << "Starting " << name << ".\n"
-            << "count: " << count << ", length: " << length << "\n";
+            << "count: " << testbed_settings.count
+            << ", length: " << testbed_settings.length << "\n";
 
   // run
   ns3::Simulator::Run();
