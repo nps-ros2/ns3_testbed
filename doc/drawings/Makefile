@@ -1,5 +1,7 @@
 drawings = \
-	overview.png
+	overview.png \
+	nns_simple4.png nns_wifi_only.png nns_wifi_detail.png
+
 
 .SUFFIXES: .svg .pdf
 .SUFFIXES: .svg .png
