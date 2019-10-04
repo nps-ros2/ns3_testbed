@@ -1542,7 +1542,7 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="1"
-     inkscape:cx="380.32292"
+     inkscape:cx="330.10346"
      inkscape:cy="412.67327"
      inkscape:document-units="in"
      inkscape:current-layer="layer1"
@@ -1756,7 +1756,7 @@
          x="138.79868"
          y="104.07462"
          style="font-size:5.64444494px;text-align:center;text-anchor:middle;stroke-width:0.26458332"
-         id="tspan263-9">File</tspan></text>
+         id="tspan263-9" /></text>
     <rect
        style="fill:#00ffff;fill-opacity:1;stroke:#000000;stroke-width:0.29513475;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
        y="175.17993"
@@ -1806,12 +1806,6 @@
          y="137.05928"
          style="font-size:4.23333359px;text-align:start;text-anchor:start;stroke-width:0.26458335"
          id="tspan2378">  mobility</tspan></text>
-    <path
-       style="fill:none;stroke:#000000;stroke-width:0.26458335px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-       d="m 160.07292,76.469707 8.73125,9.260418"
-       id="path281-2"
-       inkscape:connector-curvature="0"
-       sodipodi:nodetypes="cc" />
     <path
        style="fill:none;stroke:#000000;stroke-width:0.25400001;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#marker1869-36)"
        d="m 137.31875,151.87596 c 0,22.48959 0,22.75417 0,22.75417"
@@ -1934,5 +1928,5 @@
            height="563"
            x="572"
            y="364" /></flowRegion><flowPara
-         id="flowPara4190"></flowPara></flowRoot>  </g>
+         id="flowPara4190" /></flowRoot>  </g>
 </svg>
