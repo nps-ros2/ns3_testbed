@@ -1,5 +1,5 @@
 drawings = \
-	overview.png \
+	overview.png modules.png \
 	nns_simple4.png nns_wifi_only.png nns_wifi_detail.png
 
 
