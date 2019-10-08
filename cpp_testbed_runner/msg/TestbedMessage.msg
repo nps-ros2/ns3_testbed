@@ -1,5 +1,5 @@
 uint64 nanoseconds
-string source
-string message_name
-uint32 message_number
+string source_name
+string subscription_name
+uint32 tx_count
 string message

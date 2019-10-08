@@ -7,8 +7,8 @@ class NetworkDataTableModel(QAbstractTableModel):
 
     def __init__(self, output_file, parent=None): 
         super(NetworkDataTableModel, self).__init__()
-        self.column_titles = ["Src-Dest", "Subscription", "Size", "Index",
-                              "Percent Loss", "Time Sent ns", "Latency ms"]
+        self.column_titles = ["Src-Dest", "Subscription", "Size", "Tx Count",
+                              "Rx Count", "Time Sent ns", "Latency ms"]
         self.network_data = dict()
         self.unsorted_keys = list()
 
@@ -33,14 +33,14 @@ class NetworkDataTableModel(QAbstractTableModel):
             return QVariant()
 
 #  // message summary
-#  std::stringstream ss;
-#  ss << msg->source << "-" << r_ptr->r << "," // src-dest
-#     << msg->message_name << ","              // subscription name
-#     << msg->message.size() << ","            // size of these records
-#     << msg->message_number << ","            // message number
-#     << percent_loss << ","                   // percent loss
-#     << msg->nanoseconds << ","               // time sent in nanoseconds
-#     << (_now_nanoseconds() - msg->nanoseconds) / 1000000.0; // delta ms
+#  ss << std::fixed << std::setprecision(2)         // use 2 decimal places
+# [0] << msg->source_name << "-" << r_ptr->r << "," // src-dest
+# [1] << msg->subscription_name << ","              // subscription name
+# [2] << msg->message.size() << ","                 // size of these records
+# [3] << msg->tx_count << ","                       // transmission count
+# [4] << ++count << ","                             // receipt count
+# [5] << msg->nanoseconds << ","                    // time sent in nanoseconds
+# [6] << (_now_nanoseconds() - msg->nanoseconds) / 1000000.0; // delta ms
 
     @pyqtSlot()
     def update_data(self):
@@ -53,8 +53,8 @@ class NetworkDataTableModel(QAbstractTableModel):
 
             # (R1-R2,subscription)
             key = (parts[0],parts[1])
-            # [size, message#, count received, time, latency]
-            value = [int(parts[2]),int(parts[3]), float(parts[4]),
+            # [size, tx_count, rx_count, time, latency]
+            value = [int(parts[2]),int(parts[3]), int(parts[4]),
                      int(parts[5]), float(parts[6])]
             new_network_data[key]=value
         self.set_data(new_network_data)

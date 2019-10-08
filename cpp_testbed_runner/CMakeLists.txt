@@ -73,5 +73,6 @@ target_link_libraries(testbed_runner testbed_robot testbed_robot_callbacks
 install(TARGETS testbed_runner DESTINATION lib/${PROJECT_NAME})
 
 file(COPY ../csv_setup/example1.csv DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+file(COPY ../csv_setup/example_2_2_to_4.csv DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
 ament_package()

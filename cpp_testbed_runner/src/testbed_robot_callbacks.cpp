@@ -55,9 +55,9 @@ void publisher_callback_t::publish_message() {
                 std::make_shared<cpp_testbed_runner::msg::TestbedMessage>());
 
   msg->nanoseconds = _now_nanoseconds();
-  msg->source = r_ptr->r;
-  msg->message_name = subscription_name;
-  msg->message_number = ++count;
+  msg->source_name = r_ptr->r;
+  msg->subscription_name = subscription_name;
+  msg->tx_count = ++count;
   msg->message = std::string(size, subscription_name[0]);
 
   if (verbose) {
@@ -99,17 +99,14 @@ subscriber_callback_t::subscriber_callback_t(testbed_robot_t* _r_ptr,
 void subscriber_callback_t::subscriber_callback(
               const cpp_testbed_runner::msg::TestbedMessage::SharedPtr msg) {
 
-  // message summary
-  float percent_loss = 100.0 * (msg->message_number - ++count)/
-                           msg->message_number;
   std::stringstream ss;
-  ss << std::fixed << std::setprecision(2)    // use 2 decimal places
-     << msg->source << "-" << r_ptr->r << "," // src-dest
-     << msg->message_name << ","              // subscription name
-     << msg->message.size() << ","            // size of these records
-     << msg->message_number << ","            // message number
-     << percent_loss << ","                   // percent loss
-     << msg->nanoseconds << ","               // time sent in nanoseconds
+  ss << std::fixed << std::setprecision(2)         // use 2 decimal places
+     << msg->source_name << "-" << r_ptr->r << "," // src-dest
+     << msg->subscription_name << ","              // subscription name
+     << msg->message.size() << ","                 // size of these records
+     << msg->tx_count << ","                       // transmission count
+     << ++count << ","                             // receipt count
+     << msg->nanoseconds << ","                    // time sent in nanoseconds
      << (_now_nanoseconds() - msg->nanoseconds) / 1000000.0; // delta ms
   if(verbose || !use_pipe) {
     RCLCPP_INFO(node_logger, ss.str().c_str());
