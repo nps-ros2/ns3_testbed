@@ -15,45 +15,49 @@ def _maybe_make_pipe():
         # create pipe
         os.mkfifo(PIPE_NAME)
 
-# use PipeLogger to threadsafely write to pipe
-class PipeLogger():
-
-    def __init__(self):
-        _maybe_make_pipe()
-        self.f = open(PIPE_NAME, "w")
-
-    def log(self, text):
-        f=self.f
-        # secure exclusive lock, write, flush, unlock
-        flock(f, LOCK_EX)
-        print(text,file=f) # print appends \n
-        try:
-            f.flush()
-        except BrokenPipeError as e:
-            print("pipe log failure: %s"%str(e))
-        flock(f, LOCK_UN)
+## use PipeLogger to threadsafely write to pipe
+#class PipeLogger():
+#
+#    def __init__(self):
+#        _maybe_make_pipe()
+#        self.f = open(PIPE_NAME, "w")
+#
+#    def log(self, text):
+#        f=self.f
+#        # secure exclusive lock, write, flush, unlock
+#        flock(f, LOCK_EX)
+#        print(text,file=f) # print appends \n
+#        try:
+#            f.flush()
+#        except BrokenPipeError as e:
+#            print("pipe log failure: %s"%str(e))
+#        flock(f, LOCK_UN)
 
 # use PipeReader to consume pipe to queue
-def _pipe_consumer_thread(queue):
+def _pipe_consumer_thread(outfile, queue):
     with open(PIPE_NAME) as f:
         while True:
-            line = f.readline().rstrip()
+            line = f.readline()
             if not line:
                 # we can get an empty line if the pipe is not connected
                 # so try not to busy-wait and wait for it to open again
                 sleep(0.1)
                 continue
 
+            outfile.write(line)
             try:
-                queue.put(line)
+                queue.put(line.rstrip()) # without \n
             except queue.full:
                 print("pipe_logger queue full.  "
                       "Dropping line '%s'"%line)
-               
+
+"""Start thread to direct log to file and to queue."""
 class PipeReader():
-    def __init__(self):
+    def __init__(self, output_file):
         _maybe_make_pipe()
+        self.outfile = open(output_file, "w")
         self.queue = Queue()
-        t = Thread(target=_pipe_consumer_thread, args=(self.queue,))
+        t = Thread(target=_pipe_consumer_thread,
+                     args=(self.outfile, self.queue))
         t.start()
 

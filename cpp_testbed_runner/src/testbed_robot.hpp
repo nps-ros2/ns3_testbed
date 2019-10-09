@@ -14,8 +14,7 @@ class testbed_robot_t : public rclcpp::Node {
   public:
   const std::string nns;
   const std::string r;
-  const bool use_pipe;
-  pipe_writer_t pipe_writer;
+  const pipe_writer_t* pipe_writer_ptr;
   const bool verbose;
   const publishers_subscribers_t* ps_ptr;
 
@@ -24,14 +23,18 @@ class testbed_robot_t : public rclcpp::Node {
   std::vector<subscriber_callback_t*> subscriber_callbacks;
 
   public:
-  explicit testbed_robot_t(const std::string& _nns, const std::string& _r,
-                        bool _use_pipe, bool _verbose,
-                        const publishers_subscribers_t* const _ps_ptr);
+  explicit testbed_robot_t(const std::string& _nns,
+                           const std::string& _r,
+                           const pipe_writer_t* const _pipe_writer_ptr,
+                           const bool _verbose,
+                           const publishers_subscribers_t* const _ps_ptr);
 };
 
 // entry function to start a testbed robot
 void testbed_robot_run(std::string nns, std::string r,
-                       bool use_nns, bool use_pipe, bool verbose,
+                       const bool use_nns,
+                       const pipe_writer_t* const pipe_writer_ptr,
+                       const bool verbose,
                        publishers_subscribers_t* ps_ptr);
 
 #endif

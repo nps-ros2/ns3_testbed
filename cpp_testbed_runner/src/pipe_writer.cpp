@@ -53,12 +53,11 @@ pipe_writer_t::pipe_writer_t(bool _use_pipe) :
                     use_pipe(_use_pipe), fd(_fd(_use_pipe)) {
 }
 
-void pipe_writer_t::log(std::string text) {
+void pipe_writer_t::log(std::string text) const {
   if(!use_pipe) {
     // no action
   }
 
-  text.append("\n");
   size_t len = std::strlen(text.c_str());
 
   // lock

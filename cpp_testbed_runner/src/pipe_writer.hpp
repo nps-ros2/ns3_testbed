@@ -11,7 +11,7 @@ class pipe_writer_t {
 
   public:
   pipe_writer_t(bool _use_pipe);
-  void log(std::string text);
+  void log(std::string text) const;
 };
 
 #endif

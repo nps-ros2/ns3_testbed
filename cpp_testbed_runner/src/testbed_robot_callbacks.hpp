@@ -14,10 +14,10 @@ class publisher_callback_t {
   private:
   testbed_robot_t* r_ptr;
   const std::string subscription_name;
+  std::vector<std::string> subscribers;
   const unsigned int size;
-  const std::chrono::microseconds microseconds;
+  const std::chrono::microseconds periodicity;
   const rmw_qos_profile_t qos_profile;
-  const bool verbose;
 
   int count;
   rclcpp::Publisher<cpp_testbed_runner::msg::TestbedMessage>::SharedPtr
@@ -29,9 +29,8 @@ class publisher_callback_t {
   publisher_callback_t(testbed_robot_t* _r_ptr,
                        const std::string _subscription_name,
                        const unsigned int _size,
-                       const std::chrono::microseconds _microseconds,
-                       const rmw_qos_profile_t _qos_profile,
-                       const bool _verbose);
+                       const std::chrono::microseconds _periodicity,
+                       const rmw_qos_profile_t _qos_profile);
   void publish_message();
 };
 
@@ -42,17 +41,13 @@ class subscriber_callback_t {
   rclcpp::Subscription<cpp_testbed_runner::msg::TestbedMessage>::SharedPtr
                                                                subscription;
   const rmw_qos_profile_t qos_profile;
-  const bool use_pipe;
-  const bool verbose;
   rclcpp::Logger node_logger;
   int count;
 
   public:
   subscriber_callback_t(testbed_robot_t* _r_ptr,
                         const std::string _subscription_name,
-                        const rmw_qos_profile_t _qos_profile,
-                        const bool _use_pipe,
-                        const bool _verbose);
+                        const rmw_qos_profile_t _qos_profile);
 
   void subscriber_callback(cpp_testbed_runner::msg::TestbedMessage::SharedPtr
                                                                msg);

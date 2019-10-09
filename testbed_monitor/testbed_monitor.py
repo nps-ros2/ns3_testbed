@@ -5,6 +5,7 @@ import sys
 from PyQt5.QtWidgets import QApplication
 from PyQt5.QtWidgets import QMainWindow
 
+from pipe_logger import PipeReader
 from gui_manager import GUIManager
 
 # main
@@ -17,11 +18,14 @@ if __name__=="__main__":
                         default="_output_file.csv")
     args = parser.parse_args()
 
+    # create the pipe log reader
+    pipe_log_reader = PipeReader(args.output_file)
+
     # create the "application" and the main window
     application = QApplication(sys.argv)
     main_window = QMainWindow()
 
-    gui_manager = GUIManager(main_window, args.output_file)
+    gui_manager = GUIManager(main_window, pipe_log_reader.queue)
 
     # start the GUI
     gui_manager.w.show()

@@ -110,7 +110,8 @@ void get_options(int argc, char *argv[]) {
 }
 
 // start, stay here until done.
-void _start_robots(unsigned int count, bool use_nns, bool use_pipe,
+void _start_robots(unsigned int count, bool use_nns,
+                   pipe_writer_t* pipe_writer_ptr,
                    bool use_staggered,
                    bool verbose, publishers_subscribers_t* ps_ptr) {
 
@@ -129,7 +130,7 @@ void _start_robots(unsigned int count, bool use_nns, bool use_pipe,
 
     std::cout << "Starting " << nns << " " << r << std::endl;
     threads.push_back(new std::thread(testbed_robot_run, nns, r,
-                                      use_nns, use_pipe, verbose, ps_ptr));
+                             use_nns, pipe_writer_ptr, verbose, ps_ptr));
 
     // sleep to stagger
     if (use_staggered) {
@@ -168,7 +169,11 @@ int main(int argc, char * argv[])
   // call once per process for rclcpp
   rclcpp::init(argc, argv);
 
-  _start_robots(count, use_nns, use_pipe, use_staggered, verbose,
+  // logger
+  pipe_writer_t pipe_writer(use_pipe);
+
+  // start
+  _start_robots(count, use_nns, &pipe_writer, use_staggered, verbose,
                 publishers_subscribers_ptr);
 
   rclcpp::shutdown();

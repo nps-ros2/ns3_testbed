@@ -28,60 +28,78 @@ long _now_nanoseconds() {
 publisher_callback_t::publisher_callback_t(testbed_robot_t* _r_ptr,
                        const std::string _subscription_name,
                        const unsigned int _size,
-                       const std::chrono::microseconds _microseconds,
-                       const rmw_qos_profile_t _qos_profile,
-                       const bool _verbose) :
+                       const std::chrono::microseconds _periodicity,
+                       const rmw_qos_profile_t _qos_profile) :
            r_ptr(_r_ptr),
            subscription_name(_subscription_name),
+           subscribers(),
            size(_size),
-           microseconds(_microseconds),
+           periodicity(_periodicity),
            qos_profile(_qos_profile),
-           verbose(_verbose),
 
            count(0),
            publisher(_r_ptr->create_publisher<
                      cpp_testbed_runner::msg::TestbedMessage>(
                      _subscription_name, _qos_profile)),
-           timer(_r_ptr->create_wall_timer(microseconds,
+           timer(_r_ptr->create_wall_timer(periodicity,
                      std::bind(&publisher_callback_t::publish_message, this))),
            node_logger(r_ptr->get_logger()) 
 {
+  // make the subscriber list for network metadata
+  for (std::vector<subscribe_record_t>::const_iterator it =
+                    r_ptr->ps_ptr->subscribers.begin();
+                    it != r_ptr->ps_ptr->subscribers.end(); ++it) {
+    if (it->subscription == subscription_name) {
+      subscribers.push_back(it->robot_name);
+    }
+  }
 }
 
 // http://www.theconstructsim.com/wp-content/uploads/2019/03/ROS2-IN-5-DAYS-e-book.pdf
 void publisher_callback_t::publish_message() {
 
+  // compose msg
   std::shared_ptr<cpp_testbed_runner::msg::TestbedMessage> msg(
                 std::make_shared<cpp_testbed_runner::msg::TestbedMessage>());
-
-  msg->nanoseconds = _now_nanoseconds();
-  msg->source_name = r_ptr->r;
-  msg->subscription_name = subscription_name;
+  msg->publisher_name = r_ptr->r;
   msg->tx_count = ++count;
   msg->message = std::string(size, subscription_name[0]);
 
-  if (verbose) {
-    RCLCPP_INFO(node_logger, "Publishing: %s count %d size %d",
-                             subscription_name.c_str(), count, size);
+  // compose network metadata log
+  std::stringstream ss;
+  long timestamp = _now_nanoseconds();
+  for (std::vector<std::string>::const_iterator it =
+                       subscribers.begin(); it != subscribers.end(); ++it) {
+    // tx log for each subscriber: from, to, subscription, tx count, timestamp
+    ss << r_ptr->r << ","             // from this robot name
+       << *it << ","                  // to other robot name
+       << subscription_name << ","    // subscription name
+       << count << ","                // transmit count
+       << timestamp << "\n";          // timestamp in nanoseconds
   }
 
+  // publish the message
   publisher->publish(msg);
+
+  // log the network metadata
+  r_ptr->pipe_writer_ptr->log(ss.str());
+
+  if (r_ptr->verbose) {
+    RCLCPP_INFO(node_logger, "Publishing: %s transmit count %d size %d",
+                             subscription_name.c_str(), count, size);
+  }
 }
 
 // subscriber_callback
 subscriber_callback_t::subscriber_callback_t(testbed_robot_t* _r_ptr,
                       const std::string _subscription_name,
-                      const rmw_qos_profile_t _qos_profile,
-                      const bool _use_pipe,
-                      const bool _verbose) :
+                      const rmw_qos_profile_t _qos_profile) :
          r_ptr(_r_ptr),
          subscription_name(_subscription_name),
 
          subscription(0),
 
          qos_profile(_qos_profile),
-         use_pipe(_use_pipe),
-         verbose(_verbose),
          node_logger(r_ptr->get_logger()),
          count(0) {
 
@@ -99,21 +117,21 @@ subscriber_callback_t::subscriber_callback_t(testbed_robot_t* _r_ptr,
 void subscriber_callback_t::subscriber_callback(
               const cpp_testbed_runner::msg::TestbedMessage::SharedPtr msg) {
 
+  // rx log: from, to, subscription, tx count, rx count, msg size, timestamp
   std::stringstream ss;
-  ss << std::fixed << std::setprecision(2)         // use 2 decimal places
-     << msg->source_name << "-" << r_ptr->r << "," // src-dest
-     << msg->subscription_name << ","              // subscription name
-     << msg->message.size() << ","                 // size of these records
-     << msg->tx_count << ","                       // transmission count
-     << ++count << ","                             // receipt count
-     << msg->nanoseconds << ","                    // time sent in nanoseconds
-     << (_now_nanoseconds() - msg->nanoseconds) / 1000000.0; // delta ms
-  if(verbose || !use_pipe) {
-    RCLCPP_INFO(node_logger, ss.str().c_str());
-  }
+  ss << msg->publisher_name << ","         // from other robot name
+     << r_ptr->r << ","                    // to this robot name
+     << subscription_name << ","           // subscription name 
+     << msg->tx_count << ","               // transmit count
+     << ++count << ","                     // received count
+     << msg->message.size() << ","         // size of these records
+     << _now_nanoseconds() << "\n";        // timestamp in nanoseconds
 
-  if(use_pipe) {
-    r_ptr->pipe_writer.log(ss.str());
+  // network metadata log
+  r_ptr->pipe_writer_ptr->log(ss.str());
+  if(r_ptr->verbose) {
+    RCLCPP_INFO(node_logger, "Receiving : %s received count %d size %d",
+                   subscription_name.c_str(), ++count, msg->message.size());
   }
 }
 

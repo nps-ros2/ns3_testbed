@@ -14,7 +14,7 @@ from network_data_table_model import NetworkDataTableModel
 
 class GUIManager(QObject):
 
-    def __init__(self, main_window, output_file):
+    def __init__(self, main_window, queue):
         super(GUIManager, self).__init__()
 
         # main window
@@ -26,7 +26,7 @@ class GUIManager(QObject):
         self.w.setWindowIcon(QIcon('icons/animals-whale.png'))
 
         # the network data table model
-        self.network_data_table_model = NetworkDataTableModel(output_file)
+        self.network_data_table_model = NetworkDataTableModel(queue)
 
         # the proxy model
         self.proxy_model = QSortFilterProxyModel()
