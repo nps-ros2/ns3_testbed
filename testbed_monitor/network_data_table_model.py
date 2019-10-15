@@ -63,17 +63,12 @@ class NetworkDataTableModel(QAbstractTableModel):
             if not key in first_tx_data:
                 first_tx_data[key] = value
 
-        print("first_tx_data")
-        print(first_tx_data)
-
         # create table data
         # key=(from,to,subscription)
         # value=(size, tx_count, rx_count, latency)
         new_table_data = dict()
 
         for key, value in rx_data.items():
-            print("rx_data key")
-            print(key)
             if key in first_tx_data and not key in new_table_data:
 
                 # add entry if count matches

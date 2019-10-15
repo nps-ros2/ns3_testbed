@@ -124,7 +124,7 @@ void subscriber_callback_t::subscriber_callback(
      << subscription_name << ","           // subscription name 
      << msg->tx_count << ","               // transmit count
      << ++count << ","                     // received count
-     << msg->message.size() << ","         // size of these records
+     << msg->message.size() << ","         // size of message field only
      << _now_nanoseconds() << "\n";        // timestamp in nanoseconds
 
   // network metadata log
