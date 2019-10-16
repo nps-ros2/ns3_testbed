@@ -27,10 +27,10 @@ class publisher_callback_t {
 
   public:
   publisher_callback_t(testbed_robot_t* _r_ptr,
-                       const std::string _subscription_name,
+                       const std::string& _subscription_name,
                        const unsigned int _size,
                        const std::chrono::microseconds _periodicity,
-                       const rmw_qos_profile_t _qos_profile);
+                       const rmw_qos_profile_t& _qos_profile);
   void publish_message();
 };
 
@@ -46,8 +46,8 @@ class subscriber_callback_t {
 
   public:
   subscriber_callback_t(testbed_robot_t* _r_ptr,
-                        const std::string _subscription_name,
-                        const rmw_qos_profile_t _qos_profile);
+                        const std::string& _subscription_name,
+                        const rmw_qos_profile_t& _qos_profile);
 
   void subscriber_callback(cpp_testbed_runner::msg::TestbedMessage::SharedPtr
                                                                msg);

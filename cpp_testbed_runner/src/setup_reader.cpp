@@ -86,7 +86,7 @@ rmw_qos_profile_t _qos_profile(std::string history, std::string depth,
     assert(0);
   }
 
-  depth = stoi(depth);
+  profile.depth = stoi(depth);
 
   if(reliability == "reliable") {
     profile.reliability = RMW_QOS_POLICY_RELIABILITY_RELIABLE;
@@ -112,20 +112,12 @@ publish_record_t::publish_record_t(const std::vector<std::string>& row) :
            subscription(row[1]),
            microseconds(std::chrono::microseconds((int)(1000000/stof(row[2])))),
            size(stoi(row[3])), 
-           history(row[4]),
-           depth(stoi(row[5])),
-           reliability(row[6]),
-           durability(row[7]),
            qos_profile(_qos_profile(row[4],row[5],row[6],row[7])) {
 }
 
 subscribe_record_t::subscribe_record_t(const std::vector<std::string>& row) :
            robot_name(row[0]),
            subscription(row[1]),
-           history(row[2]),
-           depth(stoi(row[3])),
-           reliability(row[4]),
-           durability(row[5]),
            qos_profile(_qos_profile(row[2],row[3],row[4],row[5])) {
 }
 

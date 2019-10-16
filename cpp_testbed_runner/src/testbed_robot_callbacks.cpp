@@ -13,6 +13,73 @@
 
 #include "testbed_robot.hpp"
 
+std::string qos_profile_string(const rmw_qos_profile_t &qos_profile) {
+  std::stringstream ss;
+
+  // history
+  ss << "history: ";
+  if (qos_profile.history == RMW_QOS_POLICY_HISTORY_SYSTEM_DEFAULT) {
+    ss << "system_default, ";
+  } else if (qos_profile.history == RMW_QOS_POLICY_HISTORY_KEEP_LAST) {
+    ss << "keep_last, ";
+  } else if (qos_profile.history == RMW_QOS_POLICY_HISTORY_KEEP_ALL) {
+    ss << "keep_all, ";
+  } else {
+    assert(0);
+  }
+
+  // depth
+  ss << "depth: " << qos_profile.depth << "\n";
+
+  // reliability
+  ss << "reliability: ";
+  if (qos_profile.reliability == RMW_QOS_POLICY_RELIABILITY_SYSTEM_DEFAULT) {
+    ss << "system_default, ";
+  } else if (qos_profile.reliability == RMW_QOS_POLICY_RELIABILITY_RELIABLE) {
+    ss << "reliable, ";
+  } else if (qos_profile.reliability == RMW_QOS_POLICY_RELIABILITY_BEST_EFFORT) {
+    ss << "best_effort, ";
+  } else {
+    assert(0);
+  }
+
+  // durability
+  ss << "durability: ";
+  if (qos_profile.durability == RMW_QOS_POLICY_DURABILITY_SYSTEM_DEFAULT) {
+    ss << "system_default\n";
+  } else if (qos_profile.durability == RMW_QOS_POLICY_DURABILITY_TRANSIENT_LOCAL) {
+    ss << "transient_local\n";
+  } else if (qos_profile.durability == RMW_QOS_POLICY_DURABILITY_VOLATILE) {
+    ss << "volatile\n";
+  } else {
+    assert(0);
+  }
+
+/* these are not available until ROS2 Dashing
+  // deadline
+  ss << "deadline: " << qos_profile.deadline.sec << " seconds "
+                     << qos_profile.deadline.nsec << " nanoseconds\n";
+
+  // lifespan
+  ss << "lifespan: " << qos_profile.lifespan.sec << " seconds "
+                     << qos_profile.lifespan.nsec << " nanoseconds\n";
+
+  // liveliness
+  ss << "liveliness: ";
+  if (qos_profile.liveliness == RMW_QOS_POLICY_LIVELINESS_SYSTEM_DEFAULT) {
+    ss << "system_default\n";
+  } else if (qos_profile.liveliness == RMW_QOS_POLICY_LIVELINESS_AUTOMATIC) {
+    ss << "automatic\n";
+  } else if (qos_profile.liveliness == RMW_QOS_POLICY_LIVELINESS_MANUAL_BY_NODE) {
+    ss << "manual_by_node\n";
+  } else {
+    assert(0);
+  }
+*/
+
+  return ss.str();
+}
+
 // epoc time in nanoseconds using high_resolution_clock
 long _now_nanoseconds() {
 // https://stackoverflow.com/questions/31255486/c-how-do-i-convert-a-stdchronotime-point-to-long-and-back
@@ -26,10 +93,10 @@ long _now_nanoseconds() {
 
 // publisher_callback
 publisher_callback_t::publisher_callback_t(testbed_robot_t* _r_ptr,
-                       const std::string _subscription_name,
+                       const std::string& _subscription_name,
                        const unsigned int _size,
                        const std::chrono::microseconds _periodicity,
-                       const rmw_qos_profile_t _qos_profile) :
+                       const rmw_qos_profile_t& _qos_profile) :
            r_ptr(_r_ptr),
            subscription_name(_subscription_name),
            subscribers(),
@@ -40,7 +107,7 @@ publisher_callback_t::publisher_callback_t(testbed_robot_t* _r_ptr,
            count(0),
            publisher(_r_ptr->create_publisher<
                      cpp_testbed_runner::msg::TestbedMessage>(
-                     _subscription_name, _qos_profile)),
+                     _subscription_name, qos_profile)),
            timer(_r_ptr->create_wall_timer(periodicity,
                      std::bind(&publisher_callback_t::publish_message, this))),
            node_logger(r_ptr->get_logger()) 
@@ -53,6 +120,13 @@ publisher_callback_t::publisher_callback_t(testbed_robot_t* _r_ptr,
       subscribers.push_back(it->robot_name);
     }
   }
+
+  // show publisher
+  std::stringstream ss;
+  ss << "publisher: " << r_ptr->r << " "
+     << r_ptr->nns << " " << subscription_name << " "
+     << qos_profile_string(qos_profile);
+  std::cout << ss.str();
 }
 
 // http://www.theconstructsim.com/wp-content/uploads/2019/03/ROS2-IN-5-DAYS-e-book.pdf
@@ -92,8 +166,8 @@ void publisher_callback_t::publish_message() {
 
 // subscriber_callback
 subscriber_callback_t::subscriber_callback_t(testbed_robot_t* _r_ptr,
-                      const std::string _subscription_name,
-                      const rmw_qos_profile_t _qos_profile) :
+                      const std::string& _subscription_name,
+                      const rmw_qos_profile_t& _qos_profile) :
          r_ptr(_r_ptr),
          subscription_name(_subscription_name),
 
@@ -111,7 +185,16 @@ subscriber_callback_t::subscriber_callback_t(testbed_robot_t* _r_ptr,
           };
   subscription = _r_ptr->create_subscription<
                       cpp_testbed_runner::msg::TestbedMessage>(
-                      subscription_name, callback);
+                      subscription_name,
+                      callback,
+                      qos_profile);
+
+  // show subscriber
+  std::stringstream ss;
+  ss << "subscriber: " << r_ptr->r << " "
+     << r_ptr->nns << " " << subscription_name << " "
+     << qos_profile_string(qos_profile);
+  std::cout << ss.str();
 }
 
 void subscriber_callback_t::subscriber_callback(
