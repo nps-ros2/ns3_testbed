@@ -36,9 +36,9 @@ int main(int argc, char *argv[]) {
   // physical layer
   ns3::YansWifiChannelHelper wifiChannel(ns3::YansWifiChannelHelper::Default());
   ns3::YansWifiPhyHelper wifiPhy(ns3::YansWifiPhyHelper::Default());
-  float p=16.0206; // default
-  wifiPhy.Set("TxPowerStart", ns3::DoubleValue(p));
-  wifiPhy.Set("TxPowerEnd", ns3::DoubleValue(p));
+//  float p=16.0206; // default
+//  wifiPhy.Set("TxPowerStart", ns3::DoubleValue(p));
+//  wifiPhy.Set("TxPowerEnd", ns3::DoubleValue(p));
   wifiPhy.SetChannel(wifiChannel.Create());
 
   // ad-hoc Wifi network
