@@ -36,4 +36,5 @@ target_link_libraries(ns3_csma
 
 file(COPY ../csv_setup/ns3_defaults.csv DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 file(COPY ../csv_setup/ns3_1_4.csv DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+file(COPY ../csv_setup/ns3_25_7.csv DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 

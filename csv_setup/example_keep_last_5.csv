@@ -1,0 +1,7 @@
+Publish,,,,,,,
+Node,Subscription,Frequency,Size,History,Depth,Reliability,Durability
+R1,odometry,2,10,keep_last,5,best_effort,volatile
+,,,,,,,
+Subscribe,,,,,,,
+Node,Subscription,History,Depth,Reliability,Durability,,
+R2-5,odometry,keep_last,5,best_effort,volatile,,
