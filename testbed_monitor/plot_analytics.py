@@ -23,7 +23,7 @@ def plot_latency(args, outliers, plots_x, plots_y):
                  label="%s, %d datapoints"%(key, len(plots_x[key])))
     plt.legend()
     if args.write:
-        plt.savefig("%s_latency.pdf"%args.input_file)
+        plt.savefig("%s_latency.png"%args.input_file)
     else:
         plt.show()
 
@@ -33,11 +33,11 @@ def plot_throughput(args, plots_x, plots_y):
     plt.ylabel("Bytes per second")
     plt.xlabel("Time in seconds")
     for key in sorted(list(plots_x.keys())):
-        plt.plot(plots_x[key], plots_y[key], '.', markersize=2,
+        plt.plot(plots_x[key], plots_y[key], '-', markersize=2,
                  label=key)
     plt.legend()
     if args.write:
-        plt.savefig("%s_throughput.pdf"%args.input_file)
+        plt.savefig("%s_throughput.png"%args.input_file)
     else:
         plt.show()
 
@@ -47,11 +47,11 @@ def plot_loss(args, plots_x, plots_y):
     plt.ylabel("%Packets lost")
     plt.xlabel("Time in seconds")
     for key in sorted(list(plots_x.keys())):
-        plt.plot(plots_x[key], plots_y[key], '.', markersize=2,
+        plt.plot(plots_x[key], plots_y[key], '-', markersize=2,
                  label=key)
     plt.legend()
     if args.write:
-        plt.savefig("%s_loss.pdf"%args.input_file)
+        plt.savefig("%s_loss.png"%args.input_file)
     else:
         plt.show()
 
@@ -66,8 +66,11 @@ if __name__=="__main__":
     parser.add_argument("-m","--max_ms_latency", type=float,
                 help="The maximum ms latency allowed without being dropped.",
                         default = 20)
+    parser.add_argument("-b","--bar_period", type=int,
+                help="The time, in seconds, for each histogram bar.",
+                        default = 25)
     parser.add_argument("-w","--write", action="store_true",
-                    help="Write to <input_file>_<plot_type>.pdf.")
+                    help="Write to <input_file>_<plot_type>.png.")
     args = parser.parse_args()
 
     plots_x_latency=defaultdict(list)
@@ -101,13 +104,15 @@ if __name__=="__main__":
                     plots_x_latency[latency_key].append(time)
                     plots_y_latency[latency_key].append(latency)
 
-    # statistics by second
+    # statistics by bar period
     throughputs = defaultdict(list)
     percent_losses = defaultdict(list)
+    bar_period = args.bar_period
     for key, value in datapoints.items():
         # key = from, to, subscription, _tx_count
         # value = time_ns, latency, size
-        stat_key = key[0],key[1],key[2],int(int((value[0])-t0)/1000000000)
+        t=((value[0]-t0)//1000000000//bar_period) * bar_period
+        stat_key = key[0],key[1],key[2],t
 
         # throughput, percent_loss
         throughput = int(value[2])
