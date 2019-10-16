@@ -59,16 +59,15 @@ if __name__=="__main__":
 
     parser = ArgumentParser(description="Plot latency graph for network flows.",
                         formatter_class=ArgumentDefaultsHelpFormatter)
+    parser.add_argument("input_file", type=str,
+                        help="The CSV data input file.")
     parser.add_argument("dataset_name", type=str,
                     help="The name of this dataset.")
-    parser.add_argument("-i","--input_file", type=str,
-                        help="The CSV data input file.",
-                        default = "_infile.csv")
     parser.add_argument("-m","--max_ms_latency", type=float,
                 help="The maximum ms latency allowed without being dropped.",
                         default = 20)
     parser.add_argument("-w","--write", action="store_true",
-                    help="Write to <input_file>.pdf.")
+                    help="Write to <input_file>_<plot_type>.pdf.")
     args = parser.parse_args()
 
     plots_x_latency=defaultdict(list)
