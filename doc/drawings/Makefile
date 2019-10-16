@@ -1,6 +1,6 @@
 drawings = \
 	overview.png modules.png \
-	nns_simple4.png nns_wifi_only.png nns_wifi_detail.png 4_1.png
+	nns_simple4.png nns_wifi_only.png nns_wifi_detail.png 1_4.png
 
 
 .SUFFIXES: .svg .pdf
