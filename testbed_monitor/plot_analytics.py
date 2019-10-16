@@ -22,8 +22,8 @@ def plot_latency(args, outliers, plots_x, plots_y):
         plt.plot(plots_x[key], plots_y[key], '.', markersize=2,
                  label="%s, %d datapoints"%(key, len(plots_x[key])))
     plt.legend()
-    if args.write:
-        plt.savefig("%s_latency.png"%args.input_file)
+    if args.write_file:
+        plt.savefig("%s_latency.png"%args.write_file)
     else:
         plt.show()
 
@@ -36,8 +36,8 @@ def plot_throughput(args, plots_x, plots_y):
         plt.plot(plots_x[key], plots_y[key], '-', markersize=2,
                  label=key)
     plt.legend()
-    if args.write:
-        plt.savefig("%s_throughput.png"%args.input_file)
+    if args.write_file:
+        plt.savefig("%s_throughput.png"%args.write_file)
     else:
         plt.show()
 
@@ -50,8 +50,8 @@ def plot_loss(args, plots_x, plots_y):
         plt.plot(plots_x[key], plots_y[key], '-', markersize=2,
                  label=key)
     plt.legend()
-    if args.write:
-        plt.savefig("%s_loss.png"%args.input_file)
+    if args.write_file:
+        plt.savefig("%s_loss.png"%args.write_file)
     else:
         plt.show()
 
@@ -69,8 +69,9 @@ if __name__=="__main__":
     parser.add_argument("-b","--bar_period", type=int,
                 help="The time, in seconds, for each histogram bar.",
                         default = 25)
-    parser.add_argument("-w","--write", action="store_true",
-                    help="Write to <input_file>_<plot_type>.png.")
+    parser.add_argument("-w","--write_file", type=str,
+                    help="Write to <filename>_<plot_type>.png.",
+                        default = "testbed_plot")
     args = parser.parse_args()
 
     plots_x_latency=defaultdict(list)
