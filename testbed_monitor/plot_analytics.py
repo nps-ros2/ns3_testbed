@@ -7,20 +7,33 @@ import csv
 import matplotlib.pyplot as plt
 
 
-def plot_latency(args, outliers, plots_x, plots_y):
+def plot_latency_points(args, dropped, total, outliers, plots_x, plots_y):
     plt.clf()
-    if outliers == 0:
-        plt.title("Latency graph for %s"%args.dataset_name)
-    elif outliers == 1:
-        plt.title("Latency graph for %s\n(1 outlier dropped)"%args.dataset_name)
+    if outliers == 1:
+        plural = ""
     else:
-        plt.title("Latency graph for %s\n(%d outliers dropped)"%(args.dataset_name,
-                                                             outliers))
+        plural = "s"
+    plt.title("Latency point graph for %s\n(%d of %d messages failed, %d outlier%s dropped)"%(args.dataset_name, dropped, total, outliers, plural))
     plt.ylabel("Latency in milliseconds")
     plt.xlabel("Time in seconds")
     for key in sorted(list(plots_x.keys())):
         plt.plot(plots_x[key], plots_y[key], '.', markersize=2,
                  label="%s, %d datapoints"%(key, len(plots_x[key])))
+    plt.legend()
+    if args.write_file:
+        plt.savefig("%s_latency_points.png"%args.write_file)
+    else:
+        plt.show()
+
+def plot_latency(args, dropped_latencies, total_latencies, plots_x, plots_y):
+    plt.clf()
+    plt.title("Latency graph for %s\n(%d of %d messages failed)"%(
+                  args.dataset_name, dropped_latencies, total_latencies))
+    plt.ylabel("Latency in milliseconds")
+    plt.xlabel("Time in seconds")
+    for key in sorted(list(plots_x.keys())):
+        plt.plot(plots_x[key], plots_y[key], '-', markersize=2,
+                 label=key)
     plt.legend()
     if args.write_file:
         plt.savefig("%s_latency.png"%args.write_file)
@@ -106,8 +119,12 @@ if __name__=="__main__":
                     plots_y_latency[latency_key].append(latency)
 
     # statistics by bar period
+    latencies = defaultdict(list)
     throughputs = defaultdict(list)
     percent_losses = defaultdict(list)
+
+    dropped_latencies = 0
+    total_latencies = 0
     bar_period = args.bar_period
     for key, value in datapoints.items():
         # key = from, to, subscription, _tx_count
@@ -115,15 +132,37 @@ if __name__=="__main__":
         t=((value[0]-t0)//1000000000//bar_period) * bar_period
         stat_key = key[0],key[1],key[2],t
 
-        # throughput, percent_loss
+        # latency
+        latency = float(value[1])
+        if latency:
+            latencies[stat_key].append(latency)
+        else:
+            dropped_latencies += 1
+        total_latencies += 1
+
+        # throughput
         throughput = int(value[2])
+        throughputs[stat_key].append(throughput)
+
+        # percent_loss
         if throughput == 0:
             percent_loss = 100
         else:
             percent_loss = 0
-        
-        throughputs[stat_key].append(throughput)
         percent_losses[stat_key].append(percent_loss)
+
+    # latency
+    latencies_x = defaultdict(list)
+    latencies_y = defaultdict(list)
+    for key, value in latencies.items():
+        if not value:
+            # we do not monitor values when messages are lost
+            continue
+        # key = from, to, subscription, int_second
+        # value = int latencies
+        key_string = "%s, %s, %s"%(key[0],key[1],key[2])
+        latencies_x[key_string].append(key[3]) # second
+        latencies_y[key_string].append(mean(value))
 
     # throughput
     throughputs_x = defaultdict(list)
@@ -145,7 +184,10 @@ if __name__=="__main__":
         percent_losses_x[key_string].append(key[3]) # second
         percent_losses_y[key_string].append(mean(value))
 
-    plot_latency(args, latency_outliers, plots_x_latency, plots_y_latency)
+    plot_latency_points(args, dropped_latencies, total_latencies,
+                        latency_outliers, plots_x_latency, plots_y_latency)
+    plot_latency(args, dropped_latencies, total_latencies,
+                                    latencies_x, latencies_y)
     plot_throughput(args, throughputs_x, throughputs_y)
     plot_loss(args, percent_losses_x, percent_losses_y)
 
