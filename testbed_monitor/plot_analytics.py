@@ -84,7 +84,7 @@ if __name__=="__main__":
                         default = 25)
     parser.add_argument("-w","--write_file", type=str,
                     help="Write to <filename>_<plot_type>.png.",
-                        default = "testbed_plot")
+                        default = "")
     args = parser.parse_args()
 
     plots_x_latency=defaultdict(list)
