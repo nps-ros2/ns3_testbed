@@ -224,7 +224,7 @@ void subscriber_callback_t::subscriber_callback(
      << r_ptr->r << ","                    // to this robot name
      << subscription_name << ","           // subscription name 
      << msg->tx_count << ","               // transmit count
-     << rx_counts.inc(msg->publisher_name) // received count from publisher
+     << rx_counts.inc(msg->publisher_name) << "," // rx count from publisher
      << msg->message.size() << ","         // size of message field only
      << _now_nanoseconds() << "\n";        // timestamp in nanoseconds
 
