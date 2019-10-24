@@ -13,6 +13,25 @@
 
 #include "testbed_robot.hpp"
 
+int rx_counts_t::inc(std::string tx_name) {
+  int new_count;
+  if(counts.find(tx_name) != counts.end()) {
+    new_count = counts[tx_name] + 1;
+  } else {
+    new_count = 1;
+  }
+  counts[tx_name] = new_count;
+  return new_count;
+}
+
+int rx_counts_t::val(std::string tx_name) {
+  if(counts.find(tx_name) != counts.end()) {
+    return counts[tx_name];
+  } else {
+    return 0;
+  }
+}
+
 std::string qos_profile_string(const rmw_qos_profile_t &qos_profile) {
   std::stringstream ss;
 
@@ -175,8 +194,7 @@ subscriber_callback_t::subscriber_callback_t(testbed_robot_t* _r_ptr,
 
          qos_profile(_qos_profile),
          node_logger(r_ptr->get_logger()),
-         count(0) {
-
+         rx_counts() {
 
   auto callback = [this](
           const cpp_testbed_runner::msg::TestbedMessage::SharedPtr msg) -> void
@@ -206,7 +224,7 @@ void subscriber_callback_t::subscriber_callback(
      << r_ptr->r << ","                    // to this robot name
      << subscription_name << ","           // subscription name 
      << msg->tx_count << ","               // transmit count
-     << ++count << ","                     // received count
+     << rx_counts.inc(msg->publisher_name) // received count from publisher
      << msg->message.size() << ","         // size of message field only
      << _now_nanoseconds() << "\n";        // timestamp in nanoseconds
 
@@ -214,7 +232,9 @@ void subscriber_callback_t::subscriber_callback(
   r_ptr->pipe_writer_ptr->log(ss.str());
   if(r_ptr->verbose) {
     RCLCPP_INFO(node_logger, "Receiving : %s received count %d size %d",
-                   subscription_name.c_str(), ++count, msg->message.size());
+                   subscription_name.c_str(),
+                   rx_counts.val(msg->publisher_name),
+                   msg->message.size());
   }
 }
 

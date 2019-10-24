@@ -10,6 +10,16 @@
 
 class testbed_robot_t;
 
+// track Rx counts by Tx robot name
+class rx_counts_t {
+  private:
+  std::map<std::string, int> counts;
+
+  public:
+  int inc(std::string tx_name); // increment and return value
+  int val(std::string tx_name); // return value
+};
+
 class publisher_callback_t {
   private:
   testbed_robot_t* r_ptr;
@@ -42,7 +52,7 @@ class subscriber_callback_t {
                                                                subscription;
   const rmw_qos_profile_t qos_profile;
   rclcpp::Logger node_logger;
-  int count;
+  rx_counts_t rx_counts;
 
   public:
   subscriber_callback_t(testbed_robot_t* _r_ptr,
