@@ -1,0 +1,13 @@
+Publish,,,,,,,
+Node,Subscription,Frequency,Size,History,Depth,Reliability,Durability
+R1,heartbeat,1,20,keep_last,0,best_effort,volatile
+R2-13,flight_status,2,48,keep_last,0,best_effort,volatile
+R2-13,pose,10,56,keep_last,0,best_effort,volatile
+R1,red_pose,10,40,keep_last,0,best_effort,volatile
+,,,,,,,
+Subscribe,,,,,,,
+Node,Subscription,History,Depth,Reliability,Durability,,
+R2-13,heartbeat,keep_last,0,best_effort,volatile
+R1,flight_status,keep_last,0,best_effort,volatile
+R1,pose,keep_last,0,best_effort,volatile
+R2-13,red_pose,keep_last,0,best_effort,volatile

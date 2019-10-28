@@ -172,7 +172,7 @@ if __name__=="__main__":
         # value = int throughputs
         key_string = "%s, %s, %s"%(key[0],key[1],key[2])
         throughputs_x[key_string].append(key[3]) # second
-        throughputs_y[key_string].append(sum(value))
+        throughputs_y[key_string].append(sum(value)/bar_period)
 
     # percent loss
     percent_losses_x = defaultdict(list)

@@ -76,5 +76,6 @@ file(COPY ../csv_setup/example1.csv DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 file(COPY ../csv_setup/example_2_2_to_4.csv DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 file(COPY ../csv_setup/example_keep_last_5.csv DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 file(COPY ../csv_setup/example_3v3.csv DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+file(COPY ../csv_setup/example_6v6.csv DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
 ament_package()
