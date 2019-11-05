@@ -97,6 +97,15 @@ if __name__=="__main__":
         datapoints = dict()
         t0=None
         for c in row:
+            # allow empty lines and non-comma comments
+            if len(c) <= 1:
+                continue
+
+            # allow ROS2 log headers
+            header_index = c[0].find(": ")
+            if header_index != -1:
+                c[0] = c[0][header_index+2:]
+
             key = c[0],c[1],c[2], int(c[3]) # from, to, subscription, tx_count
             if len(c) == 5:
                 if not t0:
