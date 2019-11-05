@@ -178,8 +178,7 @@ void publisher_callback_t::publish_message() {
   r_ptr->pipe_writer_ptr->log(ss.str());
 
   if (r_ptr->verbose) {
-    RCLCPP_INFO(node_logger, "Publishing: %s transmit count %d size %d",
-                             subscription_name.c_str(), count, size);
+    RCLCPP_INFO(node_logger, ss.str());
   }
 }
 
@@ -231,10 +230,7 @@ void subscriber_callback_t::subscriber_callback(
   // network metadata log
   r_ptr->pipe_writer_ptr->log(ss.str());
   if(r_ptr->verbose) {
-    RCLCPP_INFO(node_logger, "Receiving : %s received count %d size %d",
-                   subscription_name.c_str(),
-                   rx_counts.val(msg->publisher_name),
-                   msg->message.size());
+    RCLCPP_INFO(node_logger, ss.str());
   }
 }
 
