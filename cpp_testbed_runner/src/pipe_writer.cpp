@@ -56,6 +56,7 @@ pipe_writer_t::pipe_writer_t(bool _use_pipe) :
 void pipe_writer_t::log(std::string text) const {
   if(!use_pipe) {
     // no action
+    return;
   }
 
   size_t len = std::strlen(text.c_str());
