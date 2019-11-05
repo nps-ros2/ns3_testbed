@@ -97,11 +97,15 @@ if __name__=="__main__":
         datapoints = dict()
         t0=None
         for c in row:
-            # allow empty lines and non-comma comments
-            if len(c) <= 1:
+            # skip lines with less than 5 commas
+            if len(c) < 5:
                 continue
 
-            # allow ROS2 log headers
+            # skip Row lines
+            if c[0][:4] == "Row:":
+                continue
+
+            # remove ROS2 log headers
             header_index = c[0].find(": ")
             if header_index != -1:
                 c[0] = c[0][header_index+2:]
