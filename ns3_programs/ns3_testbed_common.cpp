@@ -23,9 +23,9 @@ void testbed_setup() {
                           ns3::StringValue("ns3::RealtimeSimulatorImpl"));
   ns3::GlobalValue::Bind("ChecksumEnabled", ns3::BooleanValue(true));
 
-  // Use HardLimit mode, being sure ns-3 is modified to warn instead of halt.
-  ns3::Config::SetDefault("ns3::RealtimeSimulatorImpl::SynchronizationMode",
-                ns3::EnumValue(ns3::RealtimeSimulatorImpl::SYNC_HARD_LIMIT));
+//  // Use HardLimit mode, being sure ns-3 is modified to warn instead of halt.
+//  ns3::Config::SetDefault("ns3::RealtimeSimulatorImpl::SynchronizationMode",
+//                ns3::EnumValue(ns3::RealtimeSimulatorImpl::SYNC_HARD_LIMIT));
 }
 
 void usage() {
