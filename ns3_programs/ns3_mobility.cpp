@@ -27,6 +27,10 @@ int main(int argc, char *argv[]) {
   ns3::NodeContainer ns3_nodes;
   ns3_nodes.Create(count);
 
+  // change parameters
+//  ns3::Config::SetDefault ("ns3::WifiRemoteStationManager::MaxSlrc", ns3::UintegerValue (0));
+//  ns3::Config::SetDefault ("ns3::WifiRemoteStationManager::MaxSsrc", ns3::UintegerValue (0));
+
   // Wifi settings
   ns3::WifiHelper wifi;
   wifi.SetStandard(ns3::WIFI_PHY_STANDARD_80211a);
@@ -53,6 +57,13 @@ int main(int argc, char *argv[]) {
 
   // connect Wifi through TapBridge devices
   connect_tap_bridges(ns3_nodes, devices, count);
+
+  // configuration
+//  ns3::Config::Set ("/NodeList/*/DeviceList/*/$ns3::WifiNetDevice/Mac/Sifs", ns3::TimeValue (ns3::MicroSeconds (1000)));
+//  ns3::Config::Set ("/NodeList/*/DeviceList/*/$ns3::WifiNetDevice/Mac/Pifs", ns3::TimeValue (ns3::MicroSeconds (1000)));
+
+  // pcap
+  wifiPhy.EnablePcapAll("ns3_mobility_capture");
 
   // start interval function
   mobility_interval_function(ns3_nodes, testbed_settings);
