@@ -1,10 +1,14 @@
 #!/usr/bin/env python3
 
+from argparse import ArgumentParser
+import subprocess
+import sys
+
 # To start nns1: sudo ip netns exec nns1 /bin/bash
 # For status about network spaces: sudo ip netns list
 # For status about network devices: ip a
 
-# calculate IP values given index starting at 0
+# calculate IP values given index starting at 1
 def _ip_from_index(i):
     if i < 1 or i > 253//3: # 84
         raise Exception("bad")
@@ -17,11 +21,18 @@ def _ip_from_index(i):
 
     return wifi_veth, wifi_vethb, wifi_tap
 
-# create tap device: ip tuntap add tap1 mode tap; ip link set dev tap1 up
+# calculate MAC values given index starting at 1
+def _mac_from_index(i):
+    if i < 1 or i > 253//3: # 84
+        raise Exception("bad")
 
-from argparse import ArgumentParser
-import subprocess
-import sys
+    # wifi MAC values, https://superuser.com/questions/725467/set-mac-address-fails-rtnetlink-answers-cannot-assign-requested-address/725472
+    mac1="12:%02d:00:00:00:00"%i
+    mac2="22:%02d:00:00:00:00"%i
+    mac3="32:%02d:00:00:00:00"%i
+    return mac1, mac2, mac3
+
+# create tap device: ip tuntap add tap1 mode tap; ip link set dev tap1 up
 
 def _run_cmd(cmd):
     print("Command: %s"%cmd)
@@ -38,10 +49,12 @@ def do_setup_nns(i):
 def do_setup_wifi(i):
 
     wifi_veth, wifi_vethb, wifi_tap, = _ip_from_index(i)
+    mac_veth, mac_vethb, mac_wifi_tap = _mac_from_index(i)
 
     # create veth pair
-    _run_cmd("ip link add wifi_veth%d type veth peer name wifi_vethb%d"%(
-                                                                      i,i))
+    _run_cmd("ip link add wifi_veth%d type veth peer name wifi_vethb%d"%(i,i))
+    _run_cmd("ip link set dev wifi_veth%d address %s"%(i, mac_veth))
+    _run_cmd("ip link set dev wifi_vethb%d address %s"%(i, mac_vethb))
     _run_cmd("ip address add %s dev wifi_vethb%d"%(wifi_vethb,i))
 
     # associate wifi_veth with nns
@@ -64,6 +77,7 @@ def do_setup_wifi(i):
 
     # create tap device
     _run_cmd("ip tuntap add wifi_tap%d mode tap"%i)
+    _run_cmd("ip link set dev wifi_tap%d address %s"%(i, mac_wifi_tap))
     _run_cmd("ip addr flush dev wifi_tap%d"%i) # clear IP
     _run_cmd("ip address add %s dev wifi_tap%d"%(wifi_tap, i))
     _run_cmd("ip link set wifi_tap%d up"%i)
